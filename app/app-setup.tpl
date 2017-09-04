@@ -36,12 +36,11 @@ systemctl start consul
 # todo: support TLS in hashistack and pass in {vault_use_tls} once available
 
 #
-cat << 'EOF' > /usr/local/bin/awsauth.sh
+cat << 'SCRIPT' > /usr/local/bin/awsauth.sh
 #!/usr/bin/env bash
 
 token_path=/var/token
 nonce_path=/var/nonce
-# The variable $FOO will not be interpreted.
 
 # if curl pkcs7 fails, exit with error logged
 
@@ -77,34 +76,46 @@ if ! token_exists; then
 elif token_exists && ! token_is_valid; then
   aws_login "$(cat $nonce_path)"
 elif token_exists && token_is_valid; then
-  logger $0 "everything is ok alarm"
+  logger $0 "current vault token is still valid"
   exit 0
 fi
 }
 
 aws_login () {
+pkcs7=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/pkcs7 | tr -d '\n')
 
-#pkcs7=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/pkcs7 | paste -s -d '')
-
-echo '
+if [ -z "$1" ]; then
+# do not load nonce if initial login
+login_payload=$(cat <<EOF
 {
   "role": "test",
-  "pkcs7": "'$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/pkcs7 | tr -d '\n')'",
-  "nonce": $1
-}' > login.payload
+  "pkcs7": "$${pkcs7}"
+}
+EOF
+)
+else
+# load nonce in payload for reauthentication
+login_payload=$(cat <<EOF
+{
+  "role": "test",
+  "pkcs7": "$${pkcs7}",
+  "nonce": "$1"
+}
+EOF
+)
+fi
 
 curl \
     --silent \
     --request POST \
-    --data @login.payload \
+    --data "$${login_payload}" \
     http://active.vault.service.consul:8200/v1/auth/aws/login | tee \
     >(jq -r .auth.client_token > $token_path) \
     >(jq -r .auth.metadata.nonce > $nonce_path)
 }
 
 main
-
-EOF
+SCRIPT
 
 
 chmod +x /usr/local/bin/awsauth.sh

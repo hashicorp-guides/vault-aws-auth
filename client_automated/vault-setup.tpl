@@ -58,80 +58,79 @@ for v in $(curl -s http://127.0.0.1:8500/v1/catalog/service/vault | jq -r '.[].A
        http://$${v}:8200/v1/sys/unseal
 done
 
+# wait to ensure leader election complete for an active Vault node
+sleep 10
+
+# get active Vault IP via Consul API (cannot use DNS resolution at this stage)
+ACTIVE_VAULT_HOST=$(curl -s http://127.0.0.1:8500/v1/catalog/service/vault?tags=active | jq -r '.[0].Address')
+
 # write some secrets
 VAULT_TOKEN=$(cat /tmp/root_token)
 curl \
-    --header "X-Vault-Token:$${VAULT_TOKEN}" \
+    --silent \
+    --header "X-Vault-Token: $${VAULT_TOKEN}" \
     --request POST \
     --data '{"secret":"SUPER_SECRET_PASSWORD"}' \
-    http://active.vault.service.consul:8200/v1/secret/foo
+    http://$${ACTIVE_VAULT_HOST}:8200/v1/secret/foo
 
 # write a policy
-echo '
-path "secret/foo" {
-  capabilities = ["list", "read"]
-}
-path "supersecret/*" {
-  capabilities = ["list", "read"]
-}' > policy.payload
 
 curl \
     --silent \
-    --header "X-Vault-Token:$${VAULT_TOKEN}" \
+    --header "X-Vault-Token: $${VAULT_TOKEN}" \
     --request POST \
-    --data @policy.payload \
-    http://active.vault.service.consul:8200/v1/sys/policy/test
+    --data '{"rules":"path \"secret/foo\" {\n capabilities = [\"list\",\"read\"]\n} \npath \"supersecret/*\" {\n capabilities = [\"list\", \"read\"]\n}"}' \
+    http://$${ACTIVE_VAULT_HOST}:8200/v1/sys/policy/test
 
 ####
 ## Setup AWS authentication
 ####
 
 # Enable AWS authentication backend
-echo '
+aws_auth_payload=$(cat <<EOF
 {
   "type": "aws",
   "description": "AWS authentication setup"
-}' > aws_auth.payload
+}
+EOF
+)
 
 curl \
     --silent \
-    --header "X-Vault-Token:$${VAULT_TOKEN}" \
+    --header "X-Vault-Token: $${VAULT_TOKEN}" \
     --request POST \
-    --data @aws_auth.payload \
-    http://active.vault.service.consul:8200/v1/sys/auth/aws
+    --data "$${aws_auth_payload}" \
+    http://$${ACTIVE_VAULT_HOST}:8200/v1/sys/auth/aws
+
 
 # Configure AWS credentials in Vault
-echo '
-{
-  "access_key": "${aws_access_key}",
-  "secret_key": "${aws_secret_key}"
-}' > aws_creds.payload
-
 curl \
     --silent \
-    --header "X-Vault-Token:$${VAULT_TOKEN}" \
+    --header "X-Vault-Token: $${VAULT_TOKEN}" \
     --request POST \
-    --data @aws_creds.payload \
-    http://active.vault.service.consul:8200/v1/auth/aws/config/client
+    --data '{ "access_key": "${aws_access_key}", "secret_key": "${aws_secret_key}"}' \
+    http://$${ACTIVE_VAULT_HOST}:8200/v1/auth/aws/config/client
 
-shred aws_creds.payload
 
 # Configure AWS auth role
-echo '
+test_role_payload=$(cat <<EOF
 {
+  "auth_type": "ec2",
   "bound_region": "${region}",
   "bound_vpc_id": "${vpc_id}",
   "bound_subnet_id": "${subnet_id}",
   "role_tag": "",
-  "policies": ["test"],
+  "policies": "test",
   "max_ttl": 1800000,
   "disallow_reauthentication": false,
   "allow_instance_migration": false
-}' > test_role.payload
+}
+EOF
+)
 
 curl \
     --silent \
-    --header "X-Vault-Token:$${VAULT_TOKEN}" \
+    --header "X-Vault-Token: $${VAULT_TOKEN}" \
     --request POST \
-    --data @test_role.payload \
-    http://active.vault.service.consul:8200/v1/auth/aws/role/test
+    --data "$${test_role_payload}" \
+    http://$${ACTIVE_VAULT_HOST}:8200/v1/auth/aws/role/test

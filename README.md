@@ -27,3 +27,6 @@ STATUS:
 - client_automated works - spins up instance that bootstraps vault.
   Or at least it was working until I added the AWS setup bits.
 - app - launch works, consul join works, still working on the awsauth.sh script.
+
+script error:
+{"errors":["failed to parse JSON input: invalid character '$' looking for beginning of value"]}
