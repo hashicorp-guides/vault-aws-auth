@@ -1,8 +1,6 @@
 # Vault AWS Authentication Guide
 The goal of this guide is to help Vault users learn how to utilize Vault’s AWS authentication backend. This backend allows a user with AWS credentials, a EC2 instance or any AWS resource with an IAM role to authenticate to Vault.
 
-References:
-
 
 ## Estimated Time to Complete
 30 minutes
