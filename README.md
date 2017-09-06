@@ -1,38 +1,51 @@
+# Vault AWS Authentication Guide
+The goal of this guide is to help Vault users learn how to utilize Vault’s AWS authentication backend. This backend allows a user with AWS credentials, a EC2 instance or any AWS resource with an IAM role to authenticate to Vault.
+
+References:
 
 
-usage:
+## Estimated Time to Complete
+30 minutes
 
-## download all plugins and modules
-make init
+## Prerequisites
+- [Vault Cluster Guide](https://www.vaultproject.io/guides/vault-cluster.html)
+- [Vault Initialization Guide](https://www.vaultproject.io/guides/vault-init.html)
 
-## plan all (automated vault setup)
-make plan_all
+## Challenge
+Launch a Vault cluster using Terraform code. Provision an instance (or resource) that authenticates to Vault via EC2 or IAM roles such that the resource can access secrets to which it was granted access.
 
-## apply all (automated vault setup)
-make apply_all
+## Solution
+Deploy cluster, provision instance, validate that it can retrieve secrets after authentication.
+## Steps
 
-## plan vault
-make plan_vault
+### Step 1
 
-## apply vault
-make apply_vault
+#### UI
+##### Request
 
-## plan client_automated
-make plan_client_automated
-
-## apply client_automated
-make apply_client_automated
+##### Response: 200 OK
 
 
-ssh to host
-ssh -i vault-aws-auth-aec3dcbc.pem ec2-user@ec2-54-215-209-48.us-west-1.compute.amazonaws.com
+#### cURL
+##### Request
+
+##### Response: 200 OK
 
 
-STATUS:
-- Vault setup works
-- client_automated works - spins up instance that bootstraps vault.
-  Or at least it was working until I added the AWS setup bits.
-- app - launch works, consul join works, still working on the awsauth.sh script.
+#### CLI
+##### Request
 
-script error:
-{"errors":["failed to parse JSON input: invalid character '$' looking for beginning of value"]}
+##### Response: 200 OK
+
+
+#### Validation
+
+
+#### Reference Content
+[Blog post about AWS Authentication backend](https://www.hashicorp.com/blog/bridgewater-securing-their-aws-infrastructure-with-vault/)  
+[Vault AWS authentication backend documentation](https://www.vaultproject.io/docs/auth/aws.html)  
+[Vault AWS authentication backend - API documentation](https://www.vaultproject.io/api/auth/aws/index.html)  
+[Vault pull request for enhanced AWS authentication backend with background details](https://github.com/hashicorp/vault/pull/2441)
+
+## Next Steps
+- [Unseal Vault](https://github.com/hashicorp-guides/vault-unseal)
