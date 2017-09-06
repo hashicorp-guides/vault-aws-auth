@@ -79,7 +79,7 @@ curl \
     --silent \
     --header "X-Vault-Token: $${VAULT_TOKEN}" \
     --request POST \
-    --data '{"rules":"path \"secret/foo\" {\n capabilities = [\"list\",\"read\"]\n} \npath \"supersecret/*\" {\n capabilities = [\"list\", \"read\"]\n}"}' \
+    --data '{"rules":"path \"secret/foo\" {\n capabilities = [\"list\",\"read\"]\n} \npath \"supersecret/*\" {\n capabilities = [\"list\", \"read\"]\n} \npath \"auth/token/lookup-self\" {\n capabilities = [\"read\"]\n}"}' \
     http://$${ACTIVE_VAULT_HOST}:8200/v1/sys/policy/test
 
 ####

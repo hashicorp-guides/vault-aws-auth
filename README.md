@@ -2,8 +2,14 @@
 
 usage:
 
-## download all modules
-make get
+## download all plugins and modules
+make init
+
+## plan all (automated vault setup)
+make plan_all
+
+## apply all (automated vault setup)
+make apply_all
 
 ## plan vault
 make plan_vault

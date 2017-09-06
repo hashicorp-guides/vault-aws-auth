@@ -6,7 +6,7 @@ data "terraform_remote_state" "vault" {
   backend = "local"
 
   config {
-    path = "${path.module}/../vault.tfstate"
+    path = "${path.module}/../vault/vault.tfstate"
   }
 }
 
@@ -69,7 +69,7 @@ data "template_file" "client-vault-setup" {
 }
 
 data "template_file" "format_ssh" {
-  template = "connect to client with the following command: ssh ec2-user@$${client_address} -i $${key}.pem"
+  template = "connect to client with the following command: ssh ec2-user@$${client_address} -i vault/$${key}.pem"
 
   vars {
     client_address = "${aws_instance.vault_aws_auth_app.public_dns}"

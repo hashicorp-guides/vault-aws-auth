@@ -55,12 +55,13 @@ fi
 token_is_valid() {
 #  https://www.vaultproject.io/api/auth/token/index.html#lookup-a-token-self-
   echo "Checking token validity"
-  token_lookup=$(curl -X POST \
-       -H "X-Vault-Token: $(cat $token_path)" \
-       -w %{http_code} \
+  token_lookup=$(curl \
+       --request GET \
+       --header "X-Vault-Token: $(cat $token_path)" \
+       --write-out %{http_code} \
        --silent \
        --output /dev/null \
-       $vault_addr/v1/auth/token/lookup-self)
+       http://active.vault.service.consul:8200/v1/auth/token/lookup-self)
   if [ "$token_lookup" == "200" ]; then
     echo "$0 - Valid token found, exiting"
     return 0

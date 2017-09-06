@@ -3,39 +3,44 @@
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-get: ## Download all required Terraform modules
-	@terraform get vault
-	@terraform get client_automated
-
+init: ## Download all required Terraform modules and plugins
+	@cd vault; terraform init
+	@cd client_automated; terraform init
+	@cd app; terraform init
 
 plan_vault:  ## Terraform plan Vault cluster
-	@terraform plan vault
+	@cd vault; terraform plan
 apply_vault: ## Terraform apply Vault cluster
-	@terraform apply -state=vault.tfstate vault
+	@cd vault; terraform apply -state=vault.tfstate
 destroy_vault: ## Terraform destroy Vault cluster
-	@terraform destroy -state=vault.tfstate -force vault
+	@cd vault; terraform destroy -state=vault.tfstate -force
 
 
 plan_client_automated: ## Terraform plan client
-		@terraform plan client_automated
+		@cd client_automated; terraform plan
 apply_client_automated: ## Terraform apply client
-		@terraform apply -state=client_automated.tfstate client_automated
+		@cd client_automated; terraform apply -state=client_automated.tfstate
 destroy_client_automated: ## Terraform destroy client
-		@terraform destroy -state=client_automated.tfstate -force client_automated
+		@cd client_automated; terraform destroy -state=client_automated.tfstate -force
 
 
 plan_app: ## Terraform plan app
-		@terraform plan app
+		@cd app; terraform plan
 apply_app: ## Terraform apply app
-		@terraform apply -state=app.tfstate app
+		@cd app; terraform apply -state=app.tfstate
 destroy_app: ## Terraform destroy app
-		@terraform destroy -state=app.tfstate -force app
+		@cd app; terraform destroy -state=app.tfstate -force
 
 destroy_all: ## Destroy all environments
-		@terraform destroy -state=vault.tfstate -force vault
-		@terraform destroy -state=client_automated.tfstate -force client_automated
-		@terraform destroy -state=app.tfstate -force app
-		
+		@cd vault; terraform destroy -state=vault.tfstate -force
+		@cd client_automated; terraform destroy -state=client_automated.tfstate -force
+		@cd app; terraform destroy -state=app.tfstate -force
+
 clean: ## cleaning up all artifacts
 		@echo "Cleaning up"
-		@rm -rf .terraform/ *.tfstate* *.pem
+		@rm -rf .terraform/ \
+		        */.terraform/ \
+		        *.tfstate* \
+						*/*.tfstate* \
+						*.pem \
+						*/*.pem
