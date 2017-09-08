@@ -20,23 +20,23 @@ module "images-aws" {
   os_version     = "${var.os_version}"
 }
 
-resource "aws_iam_role" "vault_aws_auth_client" {
-  name               = "Vault-AWS-Auth-Client"
+resource "aws_iam_role" "vault_aws_auth_admin" {
+  name               = "Vault-AWS-Auth-admin"
   assume_role_policy = "${data.aws_iam_policy_document.assume_role.json}"
 }
 
-resource "aws_iam_role_policy" "vault_aws_auth_client" {
+resource "aws_iam_role_policy" "vault_aws_auth_admin" {
   name   = "SelfAssembly"
-  role   = "${aws_iam_role.vault_aws_auth_client.id}"
-  policy = "${data.aws_iam_policy_document.vault_aws_auth_client.json}"
+  role   = "${aws_iam_role.vault_aws_auth_admin.id}"
+  policy = "${data.aws_iam_policy_document.vault_aws_auth_admin.json}"
 }
 
-resource "aws_iam_instance_profile" "vault_aws_auth_client" {
-  name = "vault_aws_auth_client"
-  role = "${aws_iam_role.vault_aws_auth_client.id}"
+resource "aws_iam_instance_profile" "vault_aws_auth_admin" {
+  name = "vault_aws_auth_admin"
+  role = "${aws_iam_role.vault_aws_auth_admin.id}"
 }
 
-resource "aws_instance" "vault_aws_auth_client" {
+resource "aws_instance" "vault_aws_auth_admin" {
   ami           = "${module.images-aws.hashistack_image}"
   instance_type = "t2.micro"
   count         = 1
@@ -50,16 +50,16 @@ resource "aws_instance" "vault_aws_auth_client" {
 
   associate_public_ip_address = false
   ebs_optimized               = false
-  iam_instance_profile        = "${aws_iam_instance_profile.vault_aws_auth_client.id}"
+  iam_instance_profile        = "${aws_iam_instance_profile.vault_aws_auth_admin.id}"
 
   tags {
     Environment-Name = "${data.terraform_remote_state.vault.environment_name}"
   }
 
-  user_data = "${data.template_file.client-vault-setup.rendered}"
+  user_data = "${data.template_file.admin-vault-setup.rendered}"
 }
 
-data "template_file" "client-vault-setup" {
+data "template_file" "admin-vault-setup" {
   template = "${file("${path.module}/vault-setup.tpl")}"
 
   vars = {
@@ -74,10 +74,10 @@ data "template_file" "client-vault-setup" {
 }
 
 data "template_file" "format_ssh" {
-  template = "connect to client with the following command: ssh ec2-user@$${client_address} -i vault/$${key}.pem"
+  template = "connect to admin with the following command: ssh ec2-user@$${admin_address} -i vault/$${key}.pem"
 
   vars {
-    client_address = "${aws_instance.vault_aws_auth_client.public_dns}"
-    key            = "${data.terraform_remote_state.vault.ssh_key_name}"
+    admin_address = "${aws_instance.vault_aws_auth_admin.public_dns}"
+    key           = "${data.terraform_remote_state.vault.ssh_key_name}"
   }
 }
