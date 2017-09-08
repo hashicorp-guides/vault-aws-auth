@@ -5,7 +5,7 @@ help:
 
 init: ## Download all required Terraform modules and plugins
 	@cd vault; terraform init
-	@cd client_automated; terraform init
+	@cd admin; terraform init
 	@cd app; terraform init
 
 plan_vault:  ## Terraform plan Vault cluster
@@ -16,12 +16,12 @@ destroy_vault: ## Terraform destroy Vault cluster
 	@cd vault; terraform destroy -state=vault.tfstate -force
 
 
-plan_client_automated: ## Terraform plan client
-		@cd client_automated; terraform plan
-apply_client_automated: ## Terraform apply client
-		@cd client_automated; terraform apply -state=client_automated.tfstate
-destroy_client_automated: ## Terraform destroy client
-		@cd client_automated; terraform destroy -state=client_automated.tfstate -force
+plan_admin: ## Terraform plan admin node
+		@cd admin; terraform plan
+apply_admin: ## Terraform apply admin node
+		@cd admin; terraform apply -state=admin.tfstate
+destroy_admin: ## Terraform destroy admin node
+		@cd admin; terraform destroy -state=admin.tfstate -force
 
 
 plan_app: ## Terraform plan app
@@ -33,7 +33,7 @@ destroy_app: ## Terraform destroy app
 
 destroy_all: ## Destroy all environments
 		@cd vault; terraform destroy -state=vault.tfstate -force
-		@cd client_automated; terraform destroy -state=client_automated.tfstate -force
+		@cd admin; terraform destroy -state=admin.tfstate -force
 		@cd app; terraform destroy -state=app.tfstate -force
 
 clean: ## cleaning up all artifacts

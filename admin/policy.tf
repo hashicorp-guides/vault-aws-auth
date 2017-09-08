@@ -10,7 +10,7 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 
-data "aws_iam_policy_document" "vault_aws_auth_client" {
+data "aws_iam_policy_document" "vault_aws_auth_admin" {
   statement {
     sid       = "AllowSelfAssembly"
     effect    = "Allow"

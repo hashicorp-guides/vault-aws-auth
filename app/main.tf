@@ -56,10 +56,10 @@ resource "aws_instance" "vault_aws_auth_app" {
     Environment-Name = "${data.terraform_remote_state.vault.environment_name}"
   }
 
-  user_data = "${data.template_file.client-vault-setup.rendered}"
+  user_data = "${data.template_file.app-setup.rendered}"
 }
 
-data "template_file" "client-vault-setup" {
+data "template_file" "app-setup" {
   template = "${file("${path.module}/app-setup.tpl")}"
 
   vars = {
@@ -69,10 +69,10 @@ data "template_file" "client-vault-setup" {
 }
 
 data "template_file" "format_ssh" {
-  template = "connect to client with the following command: ssh ec2-user@$${client_address} -i vault/$${key}.pem"
+  template = "connect to app node with the following command: ssh ec2-user@$${app_address} -i vault/$${key}.pem"
 
   vars {
-    client_address = "${aws_instance.vault_aws_auth_app.public_dns}"
-    key            = "${data.terraform_remote_state.vault.ssh_key_name}"
+    app_address = "${aws_instance.vault_aws_auth_app.public_dns}"
+    key         = "${data.terraform_remote_state.vault.ssh_key_name}"
   }
 }
