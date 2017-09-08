@@ -18,7 +18,11 @@ Deploy cluster, provision instance, validate that it can retrieve secrets after 
 
 
 ## Steps
-Instructions assume current directory as working directory.
+Instructions have following assumptions:
+- Use current directory as working directory
+- Terraform installed locally
+- [AWS credentials configured within local environment](https://www.terraform.io/docs/providers/aws/)
+(envchain is useful on OS X)
 
 ---  
 
