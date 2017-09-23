@@ -76,7 +76,7 @@ if ! token_exists; then
   aws_login ""
 elif token_exists && ! token_is_valid; then
   aws_login "$(cat $nonce_path)"
-elif token_exists && token_is_valid; then
+else
   logger $0 "current vault token is still valid"
   exit 0
 fi

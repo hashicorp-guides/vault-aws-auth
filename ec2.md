@@ -91,5 +91,4 @@ curl --silent --header "X-Vault-Token: $(cat /var/token)" \
 
 TODO:
 - systemd-ify the awsauth script for initial login and token maintenance
-- modify awsauth script such that token validation function is not done executed multiple times per script execution
 - need to create example app that fetches and uses secrets
