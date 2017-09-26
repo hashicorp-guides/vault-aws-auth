@@ -5,7 +5,7 @@ resource "random_id" "environment_name" {
 }
 
 module "network-aws-simple" {
-  source           = "git@github.com:hashicorp-modules/network-aws-simple.git"
+  source           = "git::ssh://git@github.com/hashicorp-modules/network-aws-simple.git"
   environment_name = "${random_id.environment_name.hex}"
 }
 
@@ -25,6 +25,6 @@ module "hashistack-aws" {
 }
 
 module "ssh-keypair-aws" {
-  source       = "git@github.com:hashicorp-modules/ssh-keypair-aws.git"
+  source       = "git::ssh://git@github.com/hashicorp-modules/ssh-keypair-aws.git"
   ssh_key_name = "${random_id.environment_name.hex}"
 }
